@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from posts.models import Comment, Group, Post
 from rest_framework import status, viewsets
 from rest_framework.response import Response
+
+from posts.models import Comment, Group, Post
 
 from .mixins import UpdateDestroyMixin
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
@@ -32,9 +33,9 @@ class CommentViewSet(UpdateDestroyMixin):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(post_id=self.kwargs['nested_1_pk'])
+        return self.queryset.filter(post_id=self.kwargs['post_id'])
 
     def perform_create(self, serializer):
-        post = get_object_or_404(Post, pk=self.kwargs['nested_1_pk'])
+        post = get_object_or_404(Post, pk=self.kwargs['post_id'])
         username = get_object_or_404(Users, pk=self.request.user.id)
         serializer.save(post=post, author=username)
