@@ -13,9 +13,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
-    def create(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -32,7 +29,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (CanUserGetDeleteUpdateObj, IsAuthenticated, )
 
     def get_queryset(self):
-        return Comment.objects.all().filter(post_id=self.kwargs['post_id'])
+        return Comment.objects.filter(post_id=self.kwargs['post_id'])
 
     def perform_create(self, serializer):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
