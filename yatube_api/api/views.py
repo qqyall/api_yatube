@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
-from rest_framework.response import Response
+from rest_framework import viewsets
 
 from posts.models import Comment, Group, Post, User
 
