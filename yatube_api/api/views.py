@@ -1,17 +1,15 @@
-from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
-from posts.models import Comment, Group, Post
+from posts.models import Comment, Group, Post, User
 
-from .mixins import UpdateDestroyMixin
+from rest_framework.permissions import IsAuthenticated
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
+from .permissions import CanUserGetDeleteUpdateObj
 
-Users = get_user_model()
 
-
-class GroupViewSet(viewsets.ModelViewSet):
+class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
@@ -19,23 +17,24 @@ class GroupViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class PostViewSet(UpdateDestroyMixin):
+class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = (CanUserGetDeleteUpdateObj, IsAuthenticated, )
 
     def perform_create(self, serializer):
-        username = get_object_or_404(Users, pk=self.request.user.id)
+        username = get_object_or_404(User, pk=self.request.user.id)
         serializer.save(author=username)
 
 
-class CommentViewSet(UpdateDestroyMixin):
-    queryset = Comment.objects.all()
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = (CanUserGetDeleteUpdateObj, IsAuthenticated, )
 
     def get_queryset(self):
-        return self.queryset.filter(post_id=self.kwargs['post_id'])
+        return Comment.objects.all().filter(post_id=self.kwargs['post_id'])
 
     def perform_create(self, serializer):
-        post = get_object_or_404(Post, pk=self.kwargs['post_id'])
-        username = get_object_or_404(Users, pk=self.request.user.id)
+        post = get_object_or_404(Post, id=self.kwargs['post_id'])
+        username = get_object_or_404(User, pk=self.request.user.id)
         serializer.save(post=post, author=username)

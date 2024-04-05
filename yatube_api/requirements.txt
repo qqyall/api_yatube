@@ -15,4 +15,3 @@ pytz==2022.6
 sqlparse==0.4.3
 toml==0.10.2
 setuptools
-drf-nested-routers
